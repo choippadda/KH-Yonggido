@@ -16,45 +16,79 @@ import streamlit as st
 
 # ── 커스텀 CSS (macOS Tahoe 스타일) ──────────────────────────────
 
-CUSTOM_CSS = """
+def _build_css(dark: bool) -> str:
+    """테마에 따른 CSS를 생성."""
+    if dark:
+        v = {
+            "bg": "#1c1c1e", "bg2": "#2c2c2e", "bg_input": "#3a3a3c",
+            "sidebar_bg": "#1c1c1e", "card_bg": "#2c2c2e",
+            "text": "#f5f5f7", "text2": "#98989d", "text3": "#636366",
+            "border": "#48484a", "border_light": "#3a3a3c",
+            "accent": "#0a84ff", "accent_hover": "#409cff",
+            "accent_light": "rgba(10,132,255,0.12)",
+            "shadow": "0 1px 3px rgba(0,0,0,0.3)",
+            "tab_bg": "#3a3a3c", "tab_active_bg": "#48484a",
+            "upload_bg": "#2c2c2e",
+        }
+    else:
+        v = {
+            "bg": "#f5f5f7", "bg2": "#ffffff", "bg_input": "#ffffff",
+            "sidebar_bg": "#fafafa", "card_bg": "#ffffff",
+            "text": "#1d1d1f", "text2": "#6e6e73", "text3": "#aeaeb2",
+            "border": "#d2d2d7", "border_light": "#e5e5ea",
+            "accent": "#0071e3", "accent_hover": "#0077ed",
+            "accent_light": "rgba(0,113,227,0.08)",
+            "shadow": "0 1px 3px rgba(0,0,0,0.06)",
+            "tab_bg": "#f5f5f7", "tab_active_bg": "#ffffff",
+            "upload_bg": "#fafafa",
+        }
+
+    return f"""
 <style>
 /* ── 전역 폰트 & 배경 ─────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-html, body, [class*="css"] {
+html, body, [class*="css"] {{
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-}
+}}
+
+.stApp {{
+    background: {v['bg']} !important;
+}}
 
 /* ── 메인 컨테이너 ─────────────────────────────── */
-.block-container {
+.block-container {{
     padding-top: 2rem !important;
     max-width: 960px;
-}
+}}
 
 /* ── 헤더 영역 ─────────────────────────────────── */
-.app-header-custom {
-    background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);
+.app-header-custom {{
+    background: linear-gradient(135deg, {v['accent']} 0%, #005bb5 100%);
     border-radius: 14px;
     padding: 28px 32px;
     margin-bottom: 24px;
     color: white;
     box-shadow: 0 4px 16px rgba(0, 113, 227, 0.25);
-}
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}}
 
-.app-header-custom h1 {
+.app-header-left h1 {{
     font-size: 24px;
     font-weight: 700;
     margin: 0 0 4px 0;
     color: white !important;
-}
+}}
 
-.app-header-custom p {
+.app-header-left p {{
     font-size: 14px;
     opacity: 0.85;
     margin: 0;
-}
+}}
 
-.app-version {
+.app-version {{
     display: inline-block;
     background: rgba(255,255,255,0.2);
     border-radius: 12px;
@@ -63,80 +97,106 @@ html, body, [class*="css"] {
     font-weight: 600;
     margin-left: 8px;
     vertical-align: middle;
-}
+}}
+
+/* ── 테마 토글 버튼 ────────────────────────────── */
+.theme-toggle-btn {{
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    transition: all 0.2s;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}}
+
+.theme-toggle-btn:hover {{
+    background: rgba(255,255,255,0.25);
+}}
+
+.theme-toggle-btn .toggle-label {{
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}}
 
 /* ── 로그인 카드 ───────────────────────────────── */
-.login-card {
-    background: white;
-    border: 1px solid #d2d2d7;
+.login-card {{
+    background: {v['card_bg']};
+    border: 1px solid {v['border']};
     border-radius: 14px;
     padding: 40px;
     max-width: 400px;
     margin: 60px auto;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    box-shadow: {v['shadow']};
     text-align: center;
-}
+}}
 
-.login-card h2 {
+.login-card h2 {{
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 8px;
-    color: #1d1d1f;
-}
+    color: {v['text']};
+}}
 
-.login-card p {
+.login-card p {{
     font-size: 13px;
-    color: #6e6e73;
+    color: {v['text2']};
     margin-bottom: 24px;
-}
+}}
 
-.login-icon {
+.login-icon {{
     font-size: 48px;
     margin-bottom: 16px;
-}
+}}
 
 /* ── 섹션 카드 ─────────────────────────────────── */
-.section-card {
-    background: white;
-    border: 1px solid #e5e5ea;
+.section-card {{
+    background: {v['card_bg']};
+    border: 1px solid {v['border_light']};
     border-radius: 12px;
     padding: 20px 24px;
     margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
+    box-shadow: {v['shadow']};
+}}
 
-.section-card h3 {
+.section-card h3 {{
     font-size: 15px;
     font-weight: 600;
-    color: #1d1d1f;
+    color: {v['text']};
     margin: 0 0 4px 0;
     display: flex;
     align-items: center;
     gap: 8px;
-}
+}}
 
-.section-card .section-desc {
+.section-card .section-desc {{
     font-size: 12px;
-    color: #6e6e73;
+    color: {v['text2']};
     margin-bottom: 16px;
-}
+}}
 
 /* ── 위저드 스텝 바 ────────────────────────────── */
-.wizard-bar {
+.wizard-bar {{
     display: flex;
     align-items: center;
     gap: 0;
     padding: 16px 0;
     margin-bottom: 20px;
-}
+}}
 
-.wizard-step-item {
+.wizard-step-item {{
     display: flex;
     align-items: center;
     gap: 8px;
-}
+}}
 
-.step-circle {
+.step-circle {{
     width: 28px;
     height: 28px;
     border-radius: 50%;
@@ -145,63 +205,63 @@ html, body, [class*="css"] {
     justify-content: center;
     font-size: 12px;
     font-weight: 700;
-    border: 2px solid #d2d2d7;
-    color: #6e6e73;
-    background: #f5f5f7;
+    border: 2px solid {v['border']};
+    color: {v['text2']};
+    background: {v['bg']};
     flex-shrink: 0;
-}
+}}
 
-.step-circle.active {
-    background: #0071e3;
-    border-color: #0071e3;
+.step-circle.active {{
+    background: {v['accent']};
+    border-color: {v['accent']};
     color: white;
-}
+}}
 
-.step-circle.done {
+.step-circle.done {{
     background: #34c759;
     border-color: #34c759;
     color: white;
-}
+}}
 
-.step-label {
+.step-label {{
     font-size: 12px;
     font-weight: 500;
-    color: #6e6e73;
+    color: {v['text2']};
     white-space: nowrap;
-}
+}}
 
-.step-label.active {
-    color: #1d1d1f;
+.step-label.active {{
+    color: {v['text']};
     font-weight: 600;
-}
+}}
 
-.step-connector {
+.step-connector {{
     flex: 1;
     height: 2px;
-    background: #d2d2d7;
+    background: {v['border']};
     margin: 0 8px;
     min-width: 24px;
-}
+}}
 
-.step-connector.done {
+.step-connector.done {{
     background: #34c759;
-}
+}}
 
 /* ── 파일 업로드 존 ────────────────────────────── */
-[data-testid="stFileUploader"] {
-    border: 2px dashed #d2d2d7 !important;
+[data-testid="stFileUploader"] {{
+    border: 2px dashed {v['border']} !important;
     border-radius: 10px !important;
-    background: #fafafa !important;
+    background: {v['upload_bg']} !important;
     transition: all 0.2s;
-}
+}}
 
-[data-testid="stFileUploader"]:hover {
-    border-color: #0071e3 !important;
-    background: rgba(0, 113, 227, 0.04) !important;
-}
+[data-testid="stFileUploader"]:hover {{
+    border-color: {v['accent']} !important;
+    background: {v['accent_light']} !important;
+}}
 
 /* ── 상태 뱃지 ─────────────────────────────────── */
-.status-badge {
+.status-badge {{
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -209,86 +269,86 @@ html, body, [class*="css"] {
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
-}
+}}
 
-.badge-success {
+.badge-success {{
     background: rgba(52, 199, 89, 0.1);
     color: #34c759;
-}
+}}
 
-.badge-warning {
+.badge-warning {{
     background: rgba(255, 149, 0, 0.1);
     color: #ff9500;
-}
+}}
 
-.badge-error {
+.badge-error {{
     background: rgba(255, 59, 48, 0.1);
     color: #ff3b30;
-}
+}}
 
-.badge-info {
-    background: rgba(0, 113, 227, 0.08);
-    color: #0071e3;
-}
+.badge-info {{
+    background: {v['accent_light']};
+    color: {v['accent']};
+}}
 
 /* ── 결과 메트릭 카드 ──────────────────────────── */
-.metric-card {
-    background: white;
-    border: 1px solid #e5e5ea;
+.metric-card {{
+    background: {v['card_bg']};
+    border: 1px solid {v['border_light']};
     border-radius: 12px;
     padding: 20px;
     text-align: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}
+    box-shadow: {v['shadow']};
+}}
 
-.metric-card .metric-value {
+.metric-card .metric-value {{
     font-size: 28px;
     font-weight: 700;
-    color: #0071e3;
+    color: {v['accent']};
     margin: 4px 0;
-}
+}}
 
-.metric-card .metric-label {
+.metric-card .metric-label {{
     font-size: 12px;
-    color: #6e6e73;
+    color: {v['text2']};
     font-weight: 500;
-}
+}}
 
-.metric-card .metric-unit {
+.metric-card .metric-unit {{
     font-size: 13px;
-    color: #aeaeb2;
+    color: {v['text3']};
     font-weight: 400;
-}
+}}
 
 /* ── 사이드바 스타일 ───────────────────────────── */
-[data-testid="stSidebar"] {
-    background: #fafafa;
-}
+[data-testid="stSidebar"] {{
+    background: {v['sidebar_bg']} !important;
+}}
 
-[data-testid="stSidebar"] .block-container {
+[data-testid="stSidebar"] .block-container {{
     padding-top: 1.5rem !important;
-}
+}}
 
-.sidebar-section {
-    background: white;
-    border: 1px solid #e5e5ea;
+.sidebar-section {{
+    background: {v['card_bg']};
+    border: 1px solid {v['border_light']};
     border-radius: 10px;
     padding: 16px;
     margin-bottom: 12px;
-}
+}}
 
-.sidebar-section h4 {
+.sidebar-section h4 {{
     font-size: 12px;
     font-weight: 600;
-    color: #6e6e73;
+    color: {v['text2']};
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0 0 12px 0;
-}
+}}
 
 /* ── 버튼 스타일 ───────────────────────────────── */
-.stButton > button[kind="primary"] {
-    background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%) !important;
+.stButton > button[kind="primary"] {{
+    background: linear-gradient(135deg, {v['accent']} 0%, #005bb5 100%) !important;
     border: none !important;
     border-radius: 8px !important;
     padding: 8px 24px !important;
@@ -296,88 +356,95 @@ html, body, [class*="css"] {
     font-size: 14px !important;
     box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3) !important;
     transition: all 0.2s !important;
-}
+}}
 
-.stButton > button[kind="primary"]:hover {
+.stButton > button[kind="primary"]:hover {{
     box-shadow: 0 4px 16px rgba(0, 113, 227, 0.4) !important;
     transform: translateY(-1px);
-}
+}}
 
-.stButton > button[kind="secondary"] {
+.stButton > button[kind="secondary"] {{
     border-radius: 8px !important;
     font-weight: 500 !important;
-}
+    background: {v['card_bg']} !important;
+    color: {v['text']} !important;
+    border-color: {v['border']} !important;
+}}
 
 /* ── 다운로드 버튼 ─────────────────────────────── */
-.stDownloadButton > button {
+.stDownloadButton > button {{
     border-radius: 8px !important;
     font-weight: 500 !important;
-    border: 1px solid #d2d2d7 !important;
+    border: 1px solid {v['border']} !important;
+    background: {v['card_bg']} !important;
+    color: {v['text']} !important;
     transition: all 0.15s !important;
-}
+}}
 
-.stDownloadButton > button:hover {
-    border-color: #0071e3 !important;
-    background: rgba(0, 113, 227, 0.04) !important;
-}
+.stDownloadButton > button:hover {{
+    border-color: {v['accent']} !important;
+    background: {v['accent_light']} !important;
+}}
 
 /* ── 탭 스타일 ─────────────────────────────────── */
-.stTabs [data-baseweb="tab-list"] {
+.stTabs [data-baseweb="tab-list"] {{
     gap: 4px;
-    background: #f5f5f7;
+    background: {v['tab_bg']};
     border-radius: 10px;
     padding: 4px;
-}
+}}
 
-.stTabs [data-baseweb="tab"] {
+.stTabs [data-baseweb="tab"] {{
     border-radius: 8px !important;
     font-weight: 500 !important;
     font-size: 13px !important;
     padding: 8px 16px !important;
-}
+    color: {v['text2']} !important;
+}}
 
-.stTabs [aria-selected="true"] {
-    background: white !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
-}
+.stTabs [aria-selected="true"] {{
+    background: {v['tab_active_bg']} !important;
+    box-shadow: {v['shadow']} !important;
+    color: {v['text']} !important;
+}}
 
 /* ── 데이터프레임 ──────────────────────────────── */
-[data-testid="stDataFrame"] {
-    border: 1px solid #e5e5ea;
+[data-testid="stDataFrame"] {{
+    border: 1px solid {v['border_light']};
     border-radius: 10px;
     overflow: hidden;
-}
+}}
 
 /* ── selectbox ─────────────────────────────────── */
-[data-baseweb="select"] {
+[data-baseweb="select"] {{
     border-radius: 8px !important;
-}
+}}
 
 /* ── 알림 스타일 ───────────────────────────────── */
-.stAlert {
+.stAlert {{
     border-radius: 10px !important;
-}
+}}
 
 /* ── 구분선 ────────────────────────────────────── */
-hr {
+hr {{
     border: none;
-    border-top: 1px solid #e5e5ea;
+    border-top: 1px solid {v['border_light']};
     margin: 20px 0;
-}
+}}
 
 /* ── 진행바 ────────────────────────────────────── */
-.stProgress > div > div {
+.stProgress > div > div {{
     border-radius: 4px !important;
-    background: #e5e5ea !important;
-}
+    background: {v['border_light']} !important;
+}}
 
-.stProgress > div > div > div {
-    background: linear-gradient(90deg, #0071e3, #34c759) !important;
+.stProgress > div > div > div {{
+    background: linear-gradient(90deg, {v['accent']}, #34c759) !important;
     border-radius: 4px !important;
-}
+}}
 
 /* ── 로그 영역 ─────────────────────────────────── */
-.log-container {
+.log-container {{
     background: #1c1c1e;
     border-radius: 10px;
     padding: 16px;
@@ -387,17 +454,42 @@ hr {
     color: #f5f5f7;
     max-height: 300px;
     overflow-y: auto;
-}
+}}
 
 /* ── 푸터 ──────────────────────────────────────── */
-.app-footer {
+.app-footer {{
     text-align: center;
     padding: 24px 0;
     margin-top: 40px;
-    border-top: 1px solid #e5e5ea;
+    border-top: 1px solid {v['border_light']};
     font-size: 12px;
-    color: #aeaeb2;
-}
+    color: {v['text3']};
+}}
+
+/* ── Streamlit 기본 요소 테마 오버라이드 ───────── */
+.stMarkdown, .stMarkdown p, .stMarkdown li {{
+    color: {v['text']} !important;
+}}
+
+label, .stTextInput label, .stSelectbox label, .stNumberInput label {{
+    color: {v['text']} !important;
+}}
+
+[data-testid="stExpander"] {{
+    background: {v['card_bg']} !important;
+    border: 1px solid {v['border_light']} !important;
+    border-radius: 10px !important;
+}}
+
+[data-testid="stExpanderDetails"] {{
+    background: {v['card_bg']} !important;
+}}
+
+/* 사이드바 텍스트 */
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] .stMarkdown p {{
+    color: {v['text']} !important;
+}}
 </style>
 """
 
@@ -413,7 +505,9 @@ def check_password() -> bool:
     if st.session_state.get("authenticated"):
         return True
 
-    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+    if "dark_mode" not in st.session_state:
+        st.session_state["dark_mode"] = False
+    st.markdown(_build_css(st.session_state["dark_mode"]), unsafe_allow_html=True)
 
     # 로그인 UI
     col_l, col_c, col_r = st.columns([1, 2, 1])
@@ -529,16 +623,33 @@ def main():
     if not check_password():
         return
 
-    # 커스텀 CSS 삽입
-    st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+    # ── 다크모드 상태 초기화 ──────────────────────────────────
+    if "dark_mode" not in st.session_state:
+        st.session_state["dark_mode"] = False
 
-    # ── 헤더 ──────────────────────────────────────────────────
-    st.markdown("""
-    <div class="app-header-custom">
-        <h1>용지도 조서 산출 <span class="app-version">v2.0</span></h1>
-        <p>상수도 관로 편입/임시점용 면적을 자동 산출합니다</p>
-    </div>
-    """, unsafe_allow_html=True)
+    is_dark = st.session_state["dark_mode"]
+
+    # 커스텀 CSS 삽입 (테마 반영)
+    st.markdown(_build_css(is_dark), unsafe_allow_html=True)
+
+    # ── 헤더 + 다크모드 토글 ──────────────────────────────────
+    hdr_col1, hdr_col2 = st.columns([6, 1])
+    with hdr_col1:
+        st.markdown("""
+        <div class="app-header-custom">
+            <div class="app-header-left">
+                <h1>용지도 조서 산출 <span class="app-version">v2.0</span></h1>
+                <p>상수도 관로 편입/임시점용 면적을 자동 산출합니다</p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with hdr_col2:
+        toggle_icon = "☀️" if is_dark else "🌙"
+        toggle_label = "라이트" if is_dark else "다크"
+        if st.button(f"{toggle_icon} {toggle_label}", key="theme_toggle",
+                     use_container_width=True):
+            st.session_state["dark_mode"] = not is_dark
+            st.rerun()
 
     config = load_config()
 
