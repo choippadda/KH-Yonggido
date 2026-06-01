@@ -1,0 +1,463 @@
+﻿{
+  "app": {
+    "name": "편입/임시점용 조서 산출기",
+    "version": "0.6.0"
+  },
+  "runtime": {
+    "temp_root_dir": ".runtime_temp"
+  },
+  "csv": {
+    "encodings": [
+      "utf-8-sig",
+      "cp949",
+      "euc-kr",
+      "utf-8"
+    ],
+    "output_encoding": "utf-8-sig"
+  },
+  "analysis": {
+    "default_criterion_label": "도로기준",
+    "round_digits": 2,
+    "fallback_epsg": 5179,
+    "warn_on_geographic_crs": true
+  },
+  "numbering": {
+    "main_line_direction": "정방향",
+    "main_line_direction_options": [
+      "정방향",
+      "역방향"
+    ]
+  },
+  "cad": {
+    "file_suffix": "CAD중첩",
+    "crs_info_suffix": "CAD좌표계정보",
+    "insunits": 6,
+    "dxf_encoding": "cp949",
+    "dwg_codepage": "ANSI_949",
+    "parcel_clip_buffer_m": 20.0,
+    "text_style": {
+      "name": "MALGUN",
+      "font_file": "malgun.ttf"
+    },
+    "layers": {
+      "sheet": "YJ_SHEET",
+      "parcel": "YJ_PARCEL",
+      "lot_number": "YJ_LOTNO",
+      "permanent": "YJ_PERM",
+      "temporary": "YJ_TEMP",
+      "register": "YJ_REG_NO",
+      "leader": "YJ_REG_LEADER"
+    },
+    "colors": {
+      "sheet": 8,
+      "parcel": 9,
+      "lot_number": 7,
+      "permanent": 1,
+      "temporary": 3,
+      "register": 2,
+      "leader": 8
+    },
+    "label": {
+      "circle_radius_m": 2.0,
+      "text_height_m": 1.2,
+      "lot_text_height_m": 1.2,
+      "offset_m": 6.0,
+      "offset_scale": 0.6,
+      "vertical_offset_ratio": 0.35,
+      "alternate_sides": true,
+      "minimum_spacing_m": 8.0,
+      "geometry_clearance_m": 3.0
+    }
+  },
+  "permanent_occupancy": {
+    "default_width_m": 0.0,
+    "use_pipe_diameter_as_minimum": true,
+    "minimum_pipe_diameter_m": 0.0
+  },
+  "temporary_occupancy": {
+    "soil_cover_options_m": [
+      1.2,
+      1.3,
+      1.4,
+      1.5,
+      1.6,
+      1.7,
+      1.8,
+      1.9,
+      2.0
+    ],
+    "pavement_options": [
+      "아스팔트",
+      "콘크리트",
+      "비포장"
+    ],
+    "excavation_slope_options": [
+      "1:0.3",
+      "1:0.5",
+      "1:0.7",
+      "1:1",
+      "1:1.2",
+      "1:1.5"
+    ],
+    "defaults": {
+      "soil_cover_m": 1.2,
+      "pavement_status": "아스팔트",
+      "excavation_slope": "1:0.3"
+    },
+    "pipe_side_clearance_m": 0.4,
+    "reference_depth_m": 0.9,
+    "pavement_width_adjustment_m": {
+      "아스팔트": 0.0,
+      "콘크리트": 0.1,
+      "비포장": -0.1
+    },
+    "round_up_to_0_1m": true,
+    "minimum_pipe_diameter_m": 0.0
+  },
+  "common_occupancy_engine": {
+    "default_feature_type": "pipe",
+    "feature_rules": {
+      "pipe": {
+        "label": "관로",
+        "geometry_family": "line",
+        "permanent_model": {
+          "type": "pipe_diameter_buffer",
+          "config_ref": "permanent_occupancy"
+        },
+        "temporary_model": {
+          "type": "trench_width_formula",
+          "config_ref": "temporary_occupancy"
+        },
+        "metadata": {
+          "category": "linear_network",
+          "supports_segment_conditions": true
+        }
+      },
+      "valve_chamber": {
+        "label": "밸브실",
+        "geometry_family": "polygon",
+        "permanent_model": {
+          "type": "footprint",
+          "buffer_margin_m": 0.0
+        },
+        "temporary_model": {
+          "type": "footprint_buffer",
+          "buffer_margin_m": 1.5
+        },
+        "metadata": {
+          "category": "structure",
+          "structure_class": "valve_chamber"
+        }
+      },
+      "manhole": {
+        "label": "맨홀",
+        "geometry_family": "point",
+        "permanent_model": {
+          "type": "point_buffer",
+          "buffer_radius_m": 0.6
+        },
+        "temporary_model": {
+          "type": "point_buffer",
+          "buffer_radius_m": 1.5
+        },
+        "metadata": {
+          "category": "structure",
+          "structure_class": "manhole"
+        }
+      },
+      "shoring_zone": {
+        "label": "가시설 구간",
+        "geometry_family": "line",
+        "permanent_model": {
+          "type": "none"
+        },
+        "temporary_model": {
+          "type": "segment_condition_modifier",
+          "modifier_key": "shoring"
+        },
+        "metadata": {
+          "category": "construction_condition",
+          "affects_temporary_only": true
+        }
+      }
+    }
+  },
+  "field_mapping_definitions": {
+    "cadastral": {
+      "pnu": {
+        "label": "PNU",
+        "show_in_ui": true,
+        "required": true,
+        "aliases": [
+          "PNU",
+          "pnu",
+          "고유번호",
+          "parcel_code"
+        ]
+      },
+      "lot_number": {
+        "label": "지번/JIBUN",
+        "show_in_ui": true,
+        "required": true,
+        "aliases": [
+          "지번",
+          "jibun",
+          "JIBUN",
+          "BUNJI",
+          "lot_number"
+        ]
+      },
+      "land_category": {
+        "label": "지목",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "지목",
+          "jimok",
+          "LAND_CAT",
+          "land_category"
+        ]
+      },
+      "ownership_type": {
+        "label": "소유구분",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "소유구분",
+          "ownership",
+          "owner_type",
+          "OWNER"
+        ]
+      },
+      "region_code": {
+        "label": "행정구역코드",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "행정구역코드",
+          "법정동코드",
+          "adm_cd",
+          "region_code",
+          "ADM_CD"
+        ]
+      }
+    },
+    "facility": {
+      "diameter": {
+        "label": "관경",
+        "show_in_ui": true,
+        "required": true,
+        "aliases": [
+          "관경",
+          "diameter",
+          "pipe_dia",
+          "dia_mm",
+          "DIA_MM"
+        ]
+      },
+      "length": {
+        "label": "연장",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "연장",
+          "length",
+          "len_m",
+          "LEN_M"
+        ]
+      },
+      "facility_type": {
+        "label": "관로종류",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "관로종류",
+          "시설종류",
+          "facility_type",
+          "pipe_type",
+          "TYPE"
+        ]
+      }
+    },
+    "code_table": {
+      "code": {
+        "label": "행정구역 코드",
+        "show_in_ui": true,
+        "required": true,
+        "aliases": [
+          "행정구역코드",
+          "법정동코드",
+          "code",
+          "adm_cd",
+          "region_code",
+          "ADM_CD"
+        ]
+      },
+      "name": {
+        "label": "행정구역명",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "행정구역명",
+          "법정동명",
+          "name",
+          "region_name",
+          "ADM_NM"
+        ]
+      },
+      "sido": {
+        "label": "시도명",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "시도명",
+          "시도",
+          "sido",
+          "SIDO"
+        ]
+      },
+      "sigungu": {
+        "label": "시군구명",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "시군구명",
+          "시군구",
+          "sigungu",
+          "SIGUNGU"
+        ]
+      },
+      "eupmyeondong": {
+        "label": "읍면동명",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "읍면동명",
+          "읍면동",
+          "읍면명",
+          "동명",
+          "eupmyeondong",
+          "EUPMYEON",
+          "DONG_NM"
+        ]
+      },
+      "ri": {
+        "label": "동리명",
+        "show_in_ui": false,
+        "required": false,
+        "aliases": [
+          "동리명",
+          "리명",
+          "ri",
+          "RI"
+        ]
+      }
+    }
+  },
+  "earthwork_preprocessor": {
+    "visible_only": true,
+    "station_interval_m": 40.0,
+    "pipe_registry_start_row": 4,
+    "pipe_registry_columns": {
+      "line_name": 1,
+      "start_major": 5,
+      "start_minor": 8,
+      "end_major": 13,
+      "end_minor": 16,
+      "pipe_type": 18,
+      "diameter_text": 19,
+      "line_length": 20
+    },
+    "profile_start_row": 6,
+    "profile_columns": {
+      "station_prefix": 1,
+      "station_major": 2,
+      "station_minor": 4,
+      "station_note": 5,
+      "segment_length": 6,
+      "road_width_class": 7,
+      "excavation_qty": 9,
+      "backfill_qty": 11,
+      "sand_qty": 13,
+      "asp_qty": 15,
+      "conc_qty": 17,
+      "pavement_hint": 32
+    },
+    "earthwork_list_start_row": 4,
+    "earthwork_list_columns": {
+      "line_name": 1,
+      "pavement_status": 2,
+      "road_width_class": 3,
+      "start_prefix": 4,
+      "start_major": 6,
+      "start_minor": 9,
+      "end_prefix": 12,
+      "end_major": 14,
+      "end_minor": 17,
+      "segment_length": 19,
+      "cut_length": 20,
+      "lane_count": 21,
+      "note": 22
+    },
+    "output": {
+      "file_prefix": "토공전처리",
+      "workbook_suffix": "표준화결과",
+      "final_sheet_name": "산정입력",
+      "segments_sheet_name": "표준구간",
+      "line_registry_sheet_name": "관로라인",
+      "section_sheet_name": "대표단면",
+      "structure_sheet_name": "구조물목록",
+      "pipe_feature_sheet_name": "관로SHP요약",
+      "review_sheet_name": "검토필요",
+      "final_csv_suffix": "산정입력",
+      "segments_csv_suffix": "표준구간",
+      "line_registry_csv_suffix": "관로라인",
+      "review_csv_suffix": "검토필요",
+      "log_suffix": "처리로그"
+    }
+  },
+  "output": {
+    "file_prefix": "조서산출",
+    "workbook_sheet_names": {
+      "source": "조서원본",
+      "data": "DATA",
+      "error": "오류목록"
+    },
+    "error_columns": [
+      "레이어",
+      "원본ID",
+      "오류내용"
+    ],
+    "source_columns": [
+      "조서번호",
+      "PNU",
+      "시도",
+      "시군구",
+      "읍면동",
+      "리",
+      "지번",
+      "지목",
+      "공부면적",
+      "영구점용면적",
+      "임시점용면적"
+    ],
+    "data_sheet_columns": [
+      "조서번호",
+      "PNU",
+      "법정동코드",
+      "시도",
+      "시군구",
+      "읍면동",
+      "리",
+      "지번",
+      "지목",
+      "공부면적",
+      "영구점용면적",
+      "임시점용면적",
+      "토피(m)",
+      "포장상태",
+      "터파기기울기",
+      "임시점용폭(m)"
+    ]
+  }
+}
